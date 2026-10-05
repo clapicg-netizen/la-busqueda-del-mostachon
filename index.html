@@ -35,12 +35,20 @@
         </div>
     </div>
 
-    <!-- Modal 2: Mostachón Encontrado -->
+    <!-- Modal 2: Mostachón Encontrado / Escáner QR -->
     <div id="catch-modal" class="modal hidden">
         <div class="modal-content">
             <h2 id="mostachon-title">¡Mostachón Encontrado!</h2>
-            <p id="mostachon-desc">¡Estás muy cerca! Toca el botón para conseguirlo.</p>
+            <p id="mostachon-desc">¡Estás en la ubicación requerida!</p>
+            
+            <!-- Visor del Escáner QR (se activa solo en comercios) -->
+            <div id="qr-reader-container" class="hidden" style="margin: 15px 0;">
+                <div id="qr-reader" style="width: 100%;"></div>
+                <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Apunta con la cámara al cartel con QR del comercio</p>
+            </div>
+
             <button id="catch-btn" class="btn-action">🍩 ¡CONSEGUIR AHORA!</button>
+            <button id="cancel-catch-btn" class="btn-close" style="margin-top: 10px;">Cerrar</button>
         </div>
     </div>
 
@@ -57,6 +65,9 @@
 
     <!-- Librería del Mapa -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Librería para Lector de Código QR -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
     <!-- SDKs Compatibles de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
