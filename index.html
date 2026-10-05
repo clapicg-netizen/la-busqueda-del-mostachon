@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Caza del Mostachón - Utrerapp</title>
+    <title>La Búsqueda del Mostachón - Utrerapp</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="styles.css" />
 </head>
@@ -13,51 +12,57 @@
     <!-- Encabezado del juego -->
     <header class="game-header">
         <div class="user-info">
-            <span>👤 <strong id="player-nickname">Cazador</strong></span>
+            <span>👤 <strong id="player-nickname">Buscador</strong></span>
             <button id="btn-ranking-open" class="btn-ranking-top">🏆 Ranking</button>
         </div>
-        <h1>🍩 La Caza del Mostachón</h1>
+        <h1>🔎 La Búsqueda del Mostachón</h1>
         <div id="stats" class="stats">
             <span>Puntos: <strong id="score">0</strong></span> | 
-            <span>Cazados: <strong id="count">0</strong></span>
+            <span>Encontrados: <strong id="count">0</strong></span>
         </div>
     </header>
 
     <!-- Mapa de Utrera -->
     <div id="map"></div>
 
-    <!-- Modal 1: Registro de Apodo (Primera vez) -->
+    <!-- Modal 1: Registro de Apodo -->
     <div id="nickname-modal" class="modal">
         <div class="modal-content">
-            <h2>🍩 ¡Bienvenido a La Caza del Mostachón!</h2>
-            <p>Elige tu apodo para competir en el Ranking de Utrera:</p>
+            <h2>🔎 ¡Bienvenido a La Búsqueda del Mostachón!</h2>
+            <p>Elige tu apodo para competir en el Ranking Real de Utrera:</p>
             <input type="text" id="nickname-input" placeholder="Tu Apodo / Nick" maxlength="15" />
-            <button id="save-nickname-btn" class="btn-action">¡EMPEZAR A CAZAR!</button>
+            <button id="save-nickname-btn" class="btn-action">¡EMPEZAR A BUSCAR!</button>
         </div>
     </div>
 
-    <!-- Modal 2: Caza de Mostachón -->
+    <!-- Modal 2: Mostachón Encontrado -->
     <div id="catch-modal" class="modal hidden">
         <div class="modal-content">
             <h2 id="mostachon-title">¡Mostachón Encontrado!</h2>
-            <p id="mostachon-desc">¡Estás muy cerca! Toca el botón para cazarlo.</p>
-            <button id="catch-btn" class="btn-action">🍩 ¡CAZAR AHORA!</button>
+            <p id="mostachon-desc">¡Estás muy cerca! Toca el botón para conseguirlo.</p>
+            <button id="catch-btn" class="btn-action">🍩 ¡CONSEGUIR AHORA!</button>
         </div>
     </div>
 
     <!-- Modal 3: Tabla de Ranking -->
     <div id="ranking-modal" class="modal hidden">
         <div class="modal-content ranking-box">
-            <h2>🏆 Top Cazadores de Utrera</h2>
+            <h2>🏆 Top Buscadores de Utrera</h2>
             <div id="ranking-list" class="ranking-list">
-                <!-- Se puebla dinámicamente -->
+                <p>Cargando ranking en tiempo real...</p>
             </div>
             <button id="close-ranking-btn" class="btn-close">Cerrar</button>
         </div>
     </div>
 
-    <!-- Librerías de Mapa y Lógica -->
+    <!-- Librería del Mapa -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- SDKs Compatibles de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <!-- Lógica Principal -->
     <script src="app.js"></script>
 </body>
 </html>
