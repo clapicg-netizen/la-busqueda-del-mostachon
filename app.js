@@ -139,7 +139,7 @@ if (navigator.geolocation) {
         mostachones.forEach(m => {
             if (!m.cazado) {
                 const dist = calcularDistancia(userLat, userLng, m.lat, m.lng);
-                if (dist < 30) {
+                if (dist < 6) {
                     abrirModalCaza(m);
                 }
             }
