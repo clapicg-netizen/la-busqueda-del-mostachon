@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +12,10 @@
 
     <!-- Encabezado del juego -->
     <header class="game-header">
+        <div class="user-info">
+            <span>👤 <strong id="player-nickname">Cazador</strong></span>
+            <button id="btn-ranking-open" class="btn-ranking-top">🏆 Ranking</button>
+        </div>
         <h1>🍩 La Caza del Mostachón</h1>
         <div id="stats" class="stats">
             <span>Puntos: <strong id="score">0</strong></span> | 
@@ -21,12 +26,33 @@
     <!-- Mapa de Utrera -->
     <div id="map"></div>
 
-    <!-- Modal de Caza (Aparece al estar cerca de un mostachón) -->
+    <!-- Modal 1: Registro de Apodo (Primera vez) -->
+    <div id="nickname-modal" class="modal">
+        <div class="modal-content">
+            <h2>🍩 ¡Bienvenido a La Caza del Mostachón!</h2>
+            <p>Elige tu apodo para competir en el Ranking de Utrera:</p>
+            <input type="text" id="nickname-input" placeholder="Tu Apodo / Nick" maxlength="15" />
+            <button id="save-nickname-btn" class="btn-action">¡EMPEZAR A CAZAR!</button>
+        </div>
+    </div>
+
+    <!-- Modal 2: Caza de Mostachón -->
     <div id="catch-modal" class="modal hidden">
         <div class="modal-content">
             <h2 id="mostachon-title">¡Mostachón Encontrado!</h2>
             <p id="mostachon-desc">¡Estás muy cerca! Toca el botón para cazarlo.</p>
-            <button id="catch-btn" class="btn-catch">🍩 ¡CAZAR AHORA!</button>
+            <button id="catch-btn" class="btn-action">🍩 ¡CAZAR AHORA!</button>
+        </div>
+    </div>
+
+    <!-- Modal 3: Tabla de Ranking -->
+    <div id="ranking-modal" class="modal hidden">
+        <div class="modal-content ranking-box">
+            <h2>🏆 Top Cazadores de Utrera</h2>
+            <div id="ranking-list" class="ranking-list">
+                <!-- Se puebla dinámicamente -->
+            </div>
+            <button id="close-ranking-btn" class="btn-close">Cerrar</button>
         </div>
     </div>
 
