@@ -1,34 +1,70 @@
+
 // 1. Puntos de Interés iniciales en Utrera
 const mostachones = [
     { id: 1, nombre: "Mostachón de la Plaza", lugar: "Plaza del Altozano", lat: 37.1843, lng: -5.7808, puntos: 10, cazado: false },
     { id: 2, nombre: "Mostachón del Castillo", lugar: "Castillo de Utrera", lat: 37.1822, lng: -5.7836, puntos: 25, cazado: false },
     { id: 3, nombre: "Mostachón Bendito", lugar: "Parroquia de Santiago", lat: 37.1856, lng: -5.7821, puntos: 15, cazado: false },
-    { id: 4, nombre: "Mostachón Dorado", lugar: "Santuario de Consolación", lat: 37.192212353099116, lng: -5.766944989224266, puntos: 50, cazado: false }
+    { id: 4, nombre: "Mostachón Dorado", lugar: "Santuario de Consolación", lat: 37.1935, lng: -5.7681, puntos: 50, cazado: false }
 ];
 
-let puntosTotales = 0;
-let mostachonesCazadosCount = 0;
+// Perfil de jugador en LocalStorage
+let jugador = JSON.parse(localStorage.getItem('mostachon_user')) || {
+    nickname: '',
+    puntos: 0,
+    cazados: 0
+};
+
 let mostachonActual = null;
 
-// 2. Inicializar mapa centrado en Utrera
+// 2. Comprobar si ya tiene apodo al cargar
+document.addEventListener("DOMContentLoaded", () => {
+    if (!jugador.nickname) {
+        document.getElementById('nickname-modal').classList.remove('hidden');
+    } else {
+        actualizarUI();
+    }
+});
+
+// Guardar Apodo
+document.getElementById('save-nickname-btn').addEventListener('click', () => {
+    const nickInput = document.getElementById('nickname-input').value.trim();
+    if (nickInput) {
+        jugador.nickname = nickInput;
+        guardarProgreso();
+        document.getElementById('nickname-modal').classList.add('hidden');
+        actualizarUI();
+    } else {
+        alert("Por favor, introduce un apodo válido.");
+    }
+});
+
+function guardarProgreso() {
+    localStorage.setItem('mostachon_user', JSON.stringify(jugador));
+}
+
+function actualizarUI() {
+    document.getElementById('player-nickname').innerText = jugador.nickname;
+    document.getElementById('score').innerText = jugador.puntos;
+    document.getElementById('count').innerText = jugador.cazados;
+}
+
+// 3. Inicializar mapa
 const map = L.map('map').setView([37.1843, -5.7808], 15);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// Marcador de la posición del usuario
 let userMarker = null;
 
-// 3. Pintar los mostachones en el mapa
 mostachones.forEach(m => {
     m.marker = L.marker([m.lat, m.lng]).addTo(map)
         .bindPopup(`<b>${m.nombre}</b><br>${m.lugar}<br>Puntos: ${m.puntos}`);
 });
 
-// 4. Calcular distancia entre dos puntos (Fórmula de Haversine en metros)
+// 4. Haversine GPS
 function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Radio de la Tierra en metros
+    const R = 6371e3;
     const φ1 = lat1 * Math.PI/180;
     const φ2 = lat2 * Math.PI/180;
     const Δφ = (lat2-lat1) * Math.PI/180;
@@ -39,23 +75,21 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
               Math.sin(Δλ/2) * Math.sin(Δλ/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-    return R * c; // Distancia en metros
+    return R * c;
 }
 
-// 5. Rastrear posición del usuario en tiempo real
+// 5. Rastrear posición GPS
 if (navigator.geolocation) {
     navigator.geolocation.watchPosition(pos => {
         const userLat = pos.coords.latitude;
         const userLng = pos.coords.longitude;
 
-        // Actualizar o crear marcador del jugador
         if (!userMarker) {
             userMarker = L.circleMarker([userLat, userLng], { color: 'blue', radius: 8 }).addTo(map);
         } else {
             userMarker.setLatLng([userLat, userLng]);
         }
 
-        // Comprobar si está cerca de algún mostachón (menos de 30 metros)
         mostachones.forEach(m => {
             if (!m.cazado) {
                 const dist = calcularDistancia(userLat, userLng, m.lat, m.lng);
@@ -67,7 +101,6 @@ if (navigator.geolocation) {
     }, err => console.warn("Error GPS:", err), { enableHighAccuracy: true });
 }
 
-// 6. Abrir ventana de captura
 function abrirModalCaza(mostachon) {
     mostachonActual = mostachon;
     document.getElementById('mostachon-title').innerText = `¡${mostachon.nombre}!`;
@@ -75,23 +108,63 @@ function abrirModalCaza(mostachon) {
     document.getElementById('catch-modal').classList.remove('hidden');
 }
 
-// 7. Acción de cazar
+// Cazar Mostachón
 document.getElementById('catch-btn').addEventListener('click', () => {
     if (mostachonActual) {
         mostachonActual.cazado = true;
-        puntosTotales += mostachonActual.puntos;
-        mostachonesCazadosCount++;
+        jugador.puntos += mostachonActual.puntos;
+        jugador.cazados += 1;
 
-        // Actualizar marcador en mapa
+        guardarProgreso();
+        actualizarUI();
+
         mostachonActual.marker.setOpacity(0.4);
         mostachonActual.marker.bindPopup(`<b>${mostachonActual.nombre}</b><br>¡Ya cazado!`);
 
-        // Actualizar marcadores
-        document.getElementById('score').innerText = puntosTotales;
-        document.getElementById('count').innerText = mostachonesCazadosCount;
-
-        // Cerrar modal
         document.getElementById('catch-modal').classList.add('hidden');
         alert(`🎉 ¡Has cazado el ${mostachonActual.nombre}! +${mostachonActual.puntos} pts`);
     }
 });
+
+// 6. Ranking Modal
+document.getElementById('btn-ranking-open').addEventListener('click', () => {
+    cargarRanking();
+    document.getElementById('ranking-modal').classList.remove('hidden');
+});
+
+document.getElementById('close-ranking-btn').addEventListener('click', () => {
+    document.getElementById('ranking-modal').classList.add('hidden');
+});
+
+function cargarRanking() {
+    // Lista simulada del Ranking de Utrera + Tu usuario
+    let rankingData = [
+        { name: "Manolo_Altozano", pts: 100 },
+        { name: "Mari_Consolacion", pts: 75 },
+        { name: "Curro_Utrera", pts: 50 }
+    ];
+
+    // Añadir o actualizar usuario actual en la lista
+    if (jugador.nickname) {
+        let existe = rankingData.find(r => r.name === jugador.nickname);
+        if (existe) {
+            existe.pts = jugador.puntos;
+        } else {
+            rankingData.push({ name: jugador.nickname, pts: jugador.puntos });
+        }
+    }
+
+    // Ordenar de mayor a menor
+    rankingData.sort((a, b) => b.pts - a.pts);
+
+    let html = '';
+    rankingData.forEach((r, index) => {
+        let isMe = r.name === jugador.nickname ? 'me' : '';
+        html += `<div class="ranking-item ${isMe}">
+            <span><strong>#${index + 1}</strong> ${r.name}</span>
+            <span><strong>${r.pts} pts</strong></span>
+        </div>`;
+    });
+
+    document.getElementById('ranking-list').innerHTML = html;
+}
