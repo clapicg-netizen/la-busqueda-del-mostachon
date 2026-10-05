@@ -1,5 +1,19 @@
 
-// 1. Puntos de Interés iniciales en Utrera
+// 1. Configuración e Inicialización de Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyC99DVmi_sQnsf-AeqQG9Me07trSKlIMSY",
+  authDomain: "busqueda-mostachon.firebaseapp.com",
+  projectId: "busqueda-mostachon",
+  storageBucket: "busqueda-mostachon.firebasestorage.app",
+  messagingSenderId: "1095258377495",
+  appId: "1:1095258377495:web:fe714669c27d3475143b52"
+};
+
+// Inicializar Firebase y Firestore
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// 2. Puntos de Interés iniciales en Utrera
 const mostachones = [
     { id: 1, nombre: "Mostachón de la Plaza", lugar: "Plaza del Altozano", lat: 37.1843, lng: -5.7808, puntos: 10, cazado: false },
     { id: 2, nombre: "Mostachón del Castillo", lugar: "Castillo de Utrera", lat: 37.1822, lng: -5.7836, puntos: 25, cazado: false },
@@ -16,12 +30,13 @@ let jugador = JSON.parse(localStorage.getItem('mostachon_user')) || {
 
 let mostachonActual = null;
 
-// 2. Comprobar si ya tiene apodo al cargar
+// Comprobar apodo al cargar
 document.addEventListener("DOMContentLoaded", () => {
     if (!jugador.nickname) {
         document.getElementById('nickname-modal').classList.remove('hidden');
     } else {
         actualizarUI();
+        guardarEnFirebase();
     }
 });
 
@@ -40,6 +55,20 @@ document.getElementById('save-nickname-btn').addEventListener('click', () => {
 
 function guardarProgreso() {
     localStorage.setItem('mostachon_user', JSON.stringify(jugador));
+    guardarEnFirebase();
+}
+
+// Guardar/Actualizar Puntuación en Firebase en tiempo real
+function guardarEnFirebase() {
+    if (jugador.nickname) {
+        db.collection("ranking").doc(jugador.nickname).set({
+            nickname: jugador.nickname,
+            puntos: jugador.puntos,
+            cazados: jugador.cazados,
+            ultimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true })
+        .catch(err => console.error("Error guardando en Firebase:", err));
+    }
 }
 
 function actualizarUI() {
@@ -104,11 +133,11 @@ if (navigator.geolocation) {
 function abrirModalCaza(mostachon) {
     mostachonActual = mostachon;
     document.getElementById('mostachon-title').innerText = `¡${mostachon.nombre}!`;
-    document.getElementById('mostachon-desc').innerText = `Estás en ${mostachon.lugar}. ¡Haz clic para cazarlo y ganar ${mostachon.puntos} puntos!`;
+    document.getElementById('mostachon-desc').innerText = `Estás en ${mostachon.lugar}. ¡Haz clic para conseguirlo y ganar ${mostachon.puntos} puntos!`;
     document.getElementById('catch-modal').classList.remove('hidden');
 }
 
-// Cazar Mostachón
+// Conseguir Mostachón
 document.getElementById('catch-btn').addEventListener('click', () => {
     if (mostachonActual) {
         mostachonActual.cazado = true;
@@ -119,16 +148,16 @@ document.getElementById('catch-btn').addEventListener('click', () => {
         actualizarUI();
 
         mostachonActual.marker.setOpacity(0.4);
-        mostachonActual.marker.bindPopup(`<b>${mostachonActual.nombre}</b><br>¡Ya cazado!`);
+        mostachonActual.marker.bindPopup(`<b>${mostachonActual.nombre}</b><br>¡Ya conseguido!`);
 
         document.getElementById('catch-modal').classList.add('hidden');
-        alert(`🎉 ¡Has cazado el ${mostachonActual.nombre}! +${mostachonActual.puntos} pts`);
+        alert(`🎉 ¡Has conseguido el ${mostachonActual.nombre}! +${mostachonActual.puntos} pts`);
     }
 });
 
-// 6. Ranking Modal
+// 6. Cargar Ranking Real desde Firebase
 document.getElementById('btn-ranking-open').addEventListener('click', () => {
-    cargarRanking();
+    cargarRankingReal();
     document.getElementById('ranking-modal').classList.remove('hidden');
 });
 
@@ -136,35 +165,32 @@ document.getElementById('close-ranking-btn').addEventListener('click', () => {
     document.getElementById('ranking-modal').classList.add('hidden');
 });
 
-function cargarRanking() {
-    // Lista simulada del Ranking de Utrera + Tu usuario
-    let rankingData = [
-        { name: "Manolo_Altozano", pts: 100 },
-        { name: "Mari_Consolacion", pts: 75 },
-        { name: "Curro_Utrera", pts: 50 }
-    ];
+function cargarRankingReal() {
+    const rankingList = document.getElementById('ranking-list');
+    rankingList.innerHTML = '<p>Cargando clasificaciones...</p>';
 
-    // Añadir o actualizar usuario actual en la lista
-    if (jugador.nickname) {
-        let existe = rankingData.find(r => r.name === jugador.nickname);
-        if (existe) {
-            existe.pts = jugador.puntos;
-        } else {
-            rankingData.push({ name: jugador.nickname, pts: jugador.puntos });
+    db.collection("ranking").orderBy("puntos", "desc").limit(20).get()
+    .then((querySnapshot) => {
+        let html = '';
+        let index = 1;
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            let isMe = data.nickname === jugador.nickname ? 'me' : '';
+            html += `<div class="ranking-item ${isMe}">
+                <span><strong>#${index}</strong> ${data.nickname}</span>
+                <span><strong>${data.puntos} pts</strong></span>
+            </div>`;
+            index++;
+        });
+
+        if (html === '') {
+            html = '<p>¡Sé el primero en entrar al ranking!</p>';
         }
-    }
 
-    // Ordenar de mayor a menor
-    rankingData.sort((a, b) => b.pts - a.pts);
-
-    let html = '';
-    rankingData.forEach((r, index) => {
-        let isMe = r.name === jugador.nickname ? 'me' : '';
-        html += `<div class="ranking-item ${isMe}">
-            <span><strong>#${index + 1}</strong> ${r.name}</span>
-            <span><strong>${r.pts} pts</strong></span>
-        </div>`;
+        rankingList.innerHTML = html;
+    })
+    .catch((error) => {
+        console.error("Error al obtener ranking: ", error);
+        rankingList.innerHTML = '<p>Error al cargar el ranking.</p>';
     });
-
-    document.getElementById('ranking-list').innerHTML = html;
 }
