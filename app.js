@@ -34,7 +34,7 @@ const mostachones = [
 
     // Puntos por Código QR (Comercios y Bares)
     { id: 5, tipo: 'qr', codigoQR: "MOSTACHON_BAR_ALONSI", nombre: "Mostachón Tapero", lugar: "Bar Alonsi", lat: 37.1835, lng: -5.7812, puntos: 30, cazado: false },
-    { id: 6, tipo: 'qr', codigoQR: "MOSTACHON_LA_CHANA", nombre: "Mostachón Flamenco", lugar: "La Chana", lat: 37.1848, lng: -5.7819, puntos: 30, cazado: false },
+    { id: 6, tipo: 'qr', codigoQR: "MOSTACHON_LA_CHANA", nombre: "Mostachón Flamenco", lugar: "La Chana", lat: 37.18318398499849, lng: -5.781550532133626, puntos: 30, cazado: false },
     { id: 7, tipo: 'qr', codigoQR: "MOSTACHON_CASA_FUENTES", nombre: "Mostachón Gourmet", lugar: "Abacería Casa Fuentes", lat: 37.1839, lng: -5.7803, puntos: 30, cazado: false }
 ];
 
