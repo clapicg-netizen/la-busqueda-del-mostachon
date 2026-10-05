@@ -13,12 +13,21 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 2. Puntos de Interés iniciales en Utrera
+// Variable para el lector QR
+let html5QrCode = null;
+
+// 2. Puntos de Interés en Utrera (Híbridos: GPS y QR en comercios)
 const mostachones = [
-    { id: 1, nombre: "Mostachón de la Plaza", lugar: "Plaza del Altozano", lat: 37.1843, lng: -5.7808, puntos: 10, cazado: false },
-    { id: 2, nombre: "Mostachón del Castillo", lugar: "Castillo de Utrera", lat: 37.1822, lng: -5.7836, puntos: 25, cazado: false },
-    { id: 3, nombre: "Mostachón Bendito", lugar: "Parroquia de Santiago", lat: 37.1856, lng: -5.7821, puntos: 15, cazado: false },
-    { id: 4, nombre: "Mostachón Dorado", lugar: "Santuario de Consolación", lat: 37.1935, lng: -5.7681, puntos: 50, cazado: false }
+    // Puntos por GPS (Monumentos y Plazas)
+    { id: 1, tipo: 'gps', nombre: "Mostachón de la Plaza", lugar: "Plaza del Altozano", lat: 37.1843, lng: -5.7808, puntos: 10, cazado: false },
+    { id: 2, tipo: 'gps', nombre: "Mostachón del Castillo", lugar: "Castillo de Utrera", lat: 37.1822, lng: -5.7836, puntos: 25, cazado: false },
+    { id: 3, tipo: 'gps', nombre: "Mostachón Bendito", lugar: "Parroquia de Santiago", lat: 37.1856, lng: -5.7821, puntos: 15, cazado: false },
+    { id: 4, tipo: 'gps', nombre: "Mostachón Dorado", lugar: "Santuario de Consolación", lat: 37.1935, lng: -5.7681, puntos: 50, cazado: false },
+
+    // Puntos por Código QR (Comercios y Hostelería)
+    { id: 5, tipo: 'qr', codigoQR: "MOSTACHON_BAR_ALONSI", nombre: "Mostachón Tapero", lugar: "Bar Alonsi", lat: 37.1835, lng: -5.7812, puntos: 30, cazado: false },
+    { id: 6, tipo: 'qr', codigoQR: "MOSTACHON_LA_CHANA", nombre: "Mostachón Flamenco", lugar: "La Chana", lat: 37.1848, lng: -5.7819, puntos: 30, cazado: false },
+    { id: 7, tipo: 'qr', codigoQR: "MOSTACHON_CASA_FUENTES", nombre: "Mostachón Gourmet", lugar: "Abacería Casa Fuentes", lat: 37.1839, lng: -5.7803, puntos: 30, cazado: false }
 ];
 
 // Perfil de jugador en LocalStorage
@@ -58,7 +67,6 @@ function guardarProgreso() {
     guardarEnFirebase();
 }
 
-// Guardar/Actualizar Puntuación en Firebase en tiempo real
 function guardarEnFirebase() {
     if (jugador.nickname) {
         db.collection("ranking").doc(jugador.nickname).set({
@@ -87,8 +95,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let userMarker = null;
 
 mostachones.forEach(m => {
+    const etiquetaTipo = m.tipo === 'qr' ? ' 📷 [Escanear QR en el local]' : ' 📍 [Ubicación GPS]';
     m.marker = L.marker([m.lat, m.lng]).addTo(map)
-        .bindPopup(`<b>${m.nombre}</b><br>${m.lugar}<br>Puntos: ${m.puntos}`);
+        .bindPopup(`<b>${m.nombre}</b><br>${m.lugar}<br>Puntos: ${m.puntos}<br><i>${etiquetaTipo}</i>`);
 });
 
 // 4. Haversine GPS
@@ -133,27 +142,81 @@ if (navigator.geolocation) {
 function abrirModalCaza(mostachon) {
     mostachonActual = mostachon;
     document.getElementById('mostachon-title').innerText = `¡${mostachon.nombre}!`;
-    document.getElementById('mostachon-desc').innerText = `Estás en ${mostachon.lugar}. ¡Haz clic para conseguirlo y ganar ${mostachon.puntos} puntos!`;
+    
+    const containerQR = document.getElementById('qr-reader-container');
+    const catchBtn = document.getElementById('catch-btn');
+
+    if (mostachon.tipo === 'qr') {
+        document.getElementById('mostachon-desc').innerText = `Estás en ${mostachon.lugar}. ¡Busca el cartel oficial en la barra o mostrador y escanea el código QR!`;
+        containerQR.classList.remove('hidden');
+        catchBtn.classList.add('hidden'); // Ocultar botón directo para obligar a escanear
+        iniciarEscanerQR();
+    } else {
+        document.getElementById('mostachon-desc').innerText = `Estás en ${mostachon.lugar}. ¡Haz clic para conseguirlo y ganar ${mostachon.puntos} puntos!`;
+        containerQR.classList.add('hidden');
+        catchBtn.classList.remove('hidden');
+    }
+
     document.getElementById('catch-modal').classList.remove('hidden');
 }
 
-// Conseguir Mostachón
+// Iniciar cámara para QR
+function iniciarEscanerQR() {
+    if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qr-reader");
+    }
+    
+    html5QrCode.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: 200 },
+        (decodedText) => {
+            if (mostachonActual && decodedText === mostachonActual.codigoQR) {
+                completarBusqueda();
+                detenerEscanerQR();
+            } else {
+                alert("Código QR no válido para este mostachón.");
+            }
+        },
+        (errorMessage) => { /* Escaneando... */ }
+    ).catch(err => console.error("Error iniciando cámara QR:", err));
+}
+
+function detenerEscanerQR() {
+    if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => {
+            document.getElementById('qr-reader-container').classList.add('hidden');
+        }).catch(err => console.error(err));
+    }
+}
+
+// Conseguir Mostachón GPS
 document.getElementById('catch-btn').addEventListener('click', () => {
-    if (mostachonActual) {
-        mostachonActual.cazado = true;
-        jugador.puntos += mostachonActual.puntos;
-        jugador.cazados += 1;
-
-        guardarProgreso();
-        actualizarUI();
-
-        mostachonActual.marker.setOpacity(0.4);
-        mostachonActual.marker.bindPopup(`<b>${mostachonActual.nombre}</b><br>¡Ya conseguido!`);
-
-        document.getElementById('catch-modal').classList.add('hidden');
-        alert(`🎉 ¡Has conseguido el ${mostachonActual.nombre}! +${mostachonActual.puntos} pts`);
+    if (mostachonActual && mostachonActual.tipo === 'gps') {
+        completarBusqueda();
     }
 });
+
+// Cerrar modal de caza
+document.getElementById('cancel-catch-btn').addEventListener('click', () => {
+    detenerEscanerQR();
+    document.getElementById('catch-modal').classList.add('hidden');
+});
+
+function completarBusqueda() {
+    mostachonActual.cazado = true;
+    jugador.puntos += mostachonActual.puntos;
+    jugador.cazados += 1;
+
+    guardarProgreso();
+    actualizarUI();
+
+    mostachonActual.marker.setOpacity(0.4);
+    mostachonActual.marker.bindPopup(`<b>${mostachonActual.nombre}</b><br>¡Ya conseguido!`);
+
+    detenerEscanerQR();
+    document.getElementById('catch-modal').classList.add('hidden');
+    alert(`🎉 ¡Has conseguido el ${mostachonActual.nombre}! +${mostachonActual.puntos} pts`);
+}
 
 // 6. Cargar Ranking Real desde Firebase
 document.getElementById('btn-ranking-open').addEventListener('click', () => {
