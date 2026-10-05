@@ -16,7 +16,15 @@ const db = firebase.firestore();
 // Variable para el lector QR
 let html5QrCode = null;
 
-// 2. Puntos de Interés en Utrera (Híbridos: GPS y QR en comercios)
+// 2. Icono personalizado con tu imagen mostachon.png
+const mostachonIcon = L.icon({
+    iconUrl: 'mostachon.png',
+    iconSize: [40, 40],      // Ancho y alto de la imagen en píxeles
+    iconAnchor: [20, 40],    // Punto de apoyo en el mapa
+    popupAnchor: [0, -40]    // Posición del bocadillo informativo
+});
+
+// 3. Puntos de Interés en Utrera (GPS y QR)
 const mostachones = [
     // Puntos por GPS (Monumentos y Plazas)
     { id: 1, tipo: 'gps', nombre: "Mostachón de la Plaza", lugar: "Plaza del Altozano", lat: 37.1843, lng: -5.7808, puntos: 10, cazado: false },
@@ -24,7 +32,7 @@ const mostachones = [
     { id: 3, tipo: 'gps', nombre: "Mostachón Bendito", lugar: "Parroquia de Santiago", lat: 37.1856, lng: -5.7821, puntos: 15, cazado: false },
     { id: 4, tipo: 'gps', nombre: "Mostachón Dorado", lugar: "Santuario de Consolación", lat: 37.1935, lng: -5.7681, puntos: 50, cazado: false },
 
-    // Puntos por Código QR (Comercios y Hostelería)
+    // Puntos por Código QR (Comercios y Bares)
     { id: 5, tipo: 'qr', codigoQR: "MOSTACHON_BAR_ALONSI", nombre: "Mostachón Tapero", lugar: "Bar Alonsi", lat: 37.1835, lng: -5.7812, puntos: 30, cazado: false },
     { id: 6, tipo: 'qr', codigoQR: "MOSTACHON_LA_CHANA", nombre: "Mostachón Flamenco", lugar: "La Chana", lat: 37.1848, lng: -5.7819, puntos: 30, cazado: false },
     { id: 7, tipo: 'qr', codigoQR: "MOSTACHON_CASA_FUENTES", nombre: "Mostachón Gourmet", lugar: "Abacería Casa Fuentes", lat: 37.1839, lng: -5.7803, puntos: 30, cazado: false }
@@ -85,7 +93,7 @@ function actualizarUI() {
     document.getElementById('count').innerText = jugador.cazados;
 }
 
-// 3. Inicializar mapa
+// 4. Inicializar mapa y colocar iconos personalizados
 const map = L.map('map').setView([37.1843, -5.7808], 15);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -96,11 +104,11 @@ let userMarker = null;
 
 mostachones.forEach(m => {
     const etiquetaTipo = m.tipo === 'qr' ? ' 📷 [Escanear QR en el local]' : ' 📍 [Ubicación GPS]';
-    m.marker = L.marker([m.lat, m.lng]).addTo(map)
+    m.marker = L.marker([m.lat, m.lng], { icon: mostachonIcon }).addTo(map)
         .bindPopup(`<b>${m.nombre}</b><br>${m.lugar}<br>Puntos: ${m.puntos}<br><i>${etiquetaTipo}</i>`);
 });
 
-// 4. Haversine GPS
+// 5. Haversine GPS
 function calcularDistancia(lat1, lon1, lat2, lon2) {
     const R = 6371e3;
     const φ1 = lat1 * Math.PI/180;
@@ -116,7 +124,7 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
-// 5. Rastrear posición GPS
+// 6. Rastrear posición GPS
 if (navigator.geolocation) {
     navigator.geolocation.watchPosition(pos => {
         const userLat = pos.coords.latitude;
@@ -149,7 +157,7 @@ function abrirModalCaza(mostachon) {
     if (mostachon.tipo === 'qr') {
         document.getElementById('mostachon-desc').innerText = `Estás en ${mostachon.lugar}. ¡Busca el cartel oficial en la barra o mostrador y escanea el código QR!`;
         containerQR.classList.remove('hidden');
-        catchBtn.classList.add('hidden'); // Ocultar botón directo para obligar a escanear
+        catchBtn.classList.add('hidden');
         iniciarEscanerQR();
     } else {
         document.getElementById('mostachon-desc').innerText = `Estás en ${mostachon.lugar}. ¡Haz clic para conseguirlo y ganar ${mostachon.puntos} puntos!`;
@@ -196,7 +204,7 @@ document.getElementById('catch-btn').addEventListener('click', () => {
     }
 });
 
-// Cerrar modal de caza
+// Cerrar modal
 document.getElementById('cancel-catch-btn').addEventListener('click', () => {
     detenerEscanerQR();
     document.getElementById('catch-modal').classList.add('hidden');
@@ -218,7 +226,7 @@ function completarBusqueda() {
     alert(`🎉 ¡Has conseguido el ${mostachonActual.nombre}! +${mostachonActual.puntos} pts`);
 }
 
-// 6. Cargar Ranking Real desde Firebase
+// 7. Cargar Ranking Real desde Firebase
 document.getElementById('btn-ranking-open').addEventListener('click', () => {
     cargarRankingReal();
     document.getElementById('ranking-modal').classList.remove('hidden');
