@@ -3,7 +3,7 @@ const mostachones = [
     { id: 1, nombre: "Mostachón de la Plaza", lugar: "Plaza del Altozano", lat: 37.1843, lng: -5.7808, puntos: 10, cazado: false },
     { id: 2, nombre: "Mostachón del Castillo", lugar: "Castillo de Utrera", lat: 37.1822, lng: -5.7836, puntos: 25, cazado: false },
     { id: 3, nombre: "Mostachón Bendito", lugar: "Parroquia de Santiago", lat: 37.1856, lng: -5.7821, puntos: 15, cazado: false },
-    { id: 4, nombre: "Mostachón Dorado", lugar: "Santuario de Consolación", lat: 37.192212353099116, lng: -5.766944989224266, puntos: 50,, cazado: false }
+    { id: 4, nombre: "Mostachón Dorado", lugar: "Santuario de Consolación", lat: 37.192212353099116, lng: -5.766944989224266, puntos: 50, cazado: false }
 ];
 
 let puntosTotales = 0;
