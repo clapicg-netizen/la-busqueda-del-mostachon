@@ -1,0 +1,18 @@
+{
+  "short_name": "Mostachón",
+  "name": "La Búsqueda del Mostachón - Utrerapp",
+  "icons": [
+    {
+      "src": "mostachon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#8B4513",
+  "theme_color": "#8B4513",
+  "display": "standalone",
+  "orientation": "portrait",
+  "description": "Juego de geolocalización y caza de mostachones por Utrera dentro de Utrerapp."
+}
