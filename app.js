@@ -35,7 +35,17 @@ const mostachones = [
     // Puntos por Código QR (Comercios y Bares)
     { id: 5, tipo: 'qr', codigoQR: "MOSTACHON_BAR_ALONSI", nombre: "Mostachón Tapero", lugar: "Bar Alonsi", lat: 37.1835, lng: -5.7812, puntos: 30, cazado: false },
     { id: 6, tipo: 'qr', codigoQR: "MOSTACHON_LA_CHANA", nombre: "Mostachón Flamenco", lugar: "La Chana", lat: 37.18318398499849, lng: -5.781550532133626, puntos: 30, cazado: false },
-    { id: 7, tipo: 'qr', codigoQR: "MOSTACHON_CASA_FUENTES", nombre: "Mostachón Gourmet", lugar: "Abacería Casa Fuentes", lat: 37.1839, lng: -5.7803, puntos: 30, cazado: false }
+    { id: 7, tipo: 'qr', codigoQR: "MOSTACHON_CASA_FUENTES", nombre: "Mostachón Gourmet", lugar: "Abacería Casa Fuentes", lat: 37.1839, lng: -5.7803, puntos: 30, cazado: false },
+  {
+    id: "digital-gm",
+    nombre: "Digital GM (Electrodomésticos)",
+    tipo: "comercio",
+    puntos: 30,
+    lat: 37.1822,
+    lng: -5.7811,
+    pista: "Busca el cartel con la dona entre la mejor tecnología y electrodomésticos para el hogar.",
+    qrCode: "MOSTACHON_DIGITAL_GM_2026"
+  }
 ];
 
 // Perfil de jugador en LocalStorage
