@@ -44,7 +44,8 @@ const mostachones = [
     lat: 37.184944842496606,
     lng: -5.779516469172151,
     pista: "Busca el cartel con la dona entre la mejor tecnología y electrodomésticos para el hogar.",
-    qrCode: "MOSTACHON_DIGITAL_GM_2026"
+    qrCode: "MOSTACHON_DIGITAL_GM_2026",
+    promocion: "🎁 PROMO: 15% de descuento en imagen al conseguir este mostachón."
   }
 ];
 
