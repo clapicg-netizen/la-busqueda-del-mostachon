@@ -1,4 +1,3 @@
-
 // 1. Configuración e Inicialización de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyC99DVmi_sQnsf-AeqQG9Me07trSKlIMSY",
@@ -36,17 +35,19 @@ const mostachones = [
     { id: 5, tipo: 'qr', codigoQR: "MOSTACHON_BAR_ALONSI", nombre: "Mostachón Tapero", lugar: "Bar Alonsi", lat: 37.1835, lng: -5.7812, puntos: 30, cazado: false },
     { id: 6, tipo: 'qr', codigoQR: "MOSTACHON_LA_CHANA", nombre: "Mostachón Flamenco", lugar: "La Chana", lat: 37.18318398499849, lng: -5.781550532133626, puntos: 30, cazado: false },
     { id: 7, tipo: 'qr', codigoQR: "MOSTACHON_CASA_FUENTES", nombre: "Mostachón Gourmet", lugar: "Abacería Casa Fuentes", lat: 37.1839, lng: -5.7803, puntos: 30, cazado: false },
-  {
-    id: "digital-gm",
-    nombre: "Digital GM (Electrodomésticos)",
-    tipo: "comercio",
-    puntos: 30,
-    lat: 37.184944842496606,
-    lng: -5.779516469172151,
-    pista: "Busca el cartel con la dona entre la mejor tecnología y electrodomésticos para el hogar.",
-    qrCode: "MOSTACHON_DIGITAL_GM_2026",
-    promocion: "🎁 PROMO: 15% de descuento en imagen al conseguir este mostachón."
-  }
+    {
+      id: 8,
+      tipo: 'qr',
+      codigoQR: "MOSTACHON_DIGITAL_GM_2026",
+      nombre: "Digital GM (Electrodomésticos)",
+      lugar: "Digital GM",
+      lat: 37.184944842496606,
+      lng: -5.779516469172151,
+      puntos: 30,
+      cazado: false,
+      pista: "Busca el cartel con la dona entre la mejor tecnología y electrodomésticos para el hogar.",
+      promocion: "15% de descuento en imagen al conseguir este mostachón"
+    }
 ];
 
 // Perfil de jugador en LocalStorage
@@ -115,8 +116,9 @@ let userMarker = null;
 
 mostachones.forEach(m => {
     const etiquetaTipo = m.tipo === 'qr' ? ' 📷 [Escanear QR en el local]' : ' 📍 [Ubicación GPS]';
+    const promoTexto = m.promocion ? `<br><span style="color:#d97706; font-weight:bold;">🎁 ${m.promocion}</span>` : '';
     m.marker = L.marker([m.lat, m.lng], { icon: mostachonIcon }).addTo(map)
-        .bindPopup(`<b>${m.nombre}</b><br>${m.lugar}<br>Puntos: ${m.puntos}<br><i>${etiquetaTipo}</i>`);
+        .bindPopup(`<b>${m.nombre}</b><br>${m.lugar}<br>Puntos: ${m.puntos}${promoTexto}<br><i>${etiquetaTipo}</i>`);
 });
 
 // 5. Haversine GPS
@@ -166,7 +168,8 @@ function abrirModalCaza(mostachon) {
     const catchBtn = document.getElementById('catch-btn');
 
     if (mostachon.tipo === 'qr') {
-        document.getElementById('mostachon-desc').innerText = `Estás en ${mostachon.lugar}. ¡Busca el cartel oficial en la barra o mostrador y escanea el código QR!`;
+        const promoInfo = mostachon.promocion ? `\n\n🎁 PROMO ESPECIAL: ${mostachon.promocion}` : '';
+        document.getElementById('mostachon-desc').innerText = `Estás en ${mostachon.lugar}. ¡Busca el cartel oficial en el establecimiento y escanea el código QR!${promoInfo}`;
         containerQR.classList.remove('hidden');
         catchBtn.classList.add('hidden');
         iniciarEscanerQR();
@@ -234,7 +237,9 @@ function completarBusqueda() {
 
     detenerEscanerQR();
     document.getElementById('catch-modal').classList.add('hidden');
-    alert(`🎉 ¡Has conseguido el ${mostachonActual.nombre}! +${mostachonActual.puntos} pts`);
+    
+    const premioMsg = mostachonActual.promocion ? `\n\n🎁 ¡PREMIO CONSEGUIDO!\nMuestra esta pantalla en caja para disfrutar de: ${mostachonActual.promocion}` : '';
+    alert(`🎉 ¡Has conseguido el ${mostachonActual.nombre}! +${mostachonActual.puntos} pts${premioMsg}`);
 }
 
 // 7. Cargar Ranking Real desde Firebase
