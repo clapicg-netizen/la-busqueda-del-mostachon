@@ -41,8 +41,8 @@ const mostachones = [
     nombre: "Digital GM (Electrodomésticos)",
     tipo: "comercio",
     puntos: 30,
-    lat: 37.1822,
-    lng: -5.7811,
+    lat: 37.184944842496606,
+    lng: -5.779516469172151,
     pista: "Busca el cartel con la dona entre la mejor tecnología y electrodomésticos para el hogar.",
     qrCode: "MOSTACHON_DIGITAL_GM_2026"
   }
